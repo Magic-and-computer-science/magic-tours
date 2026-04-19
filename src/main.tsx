@@ -6,8 +6,8 @@ import Gilbreath from "./app/gilbreath.js";
 type Tour = "square" | "gilbreath";
 
 const TABS: { id: Tour; label: string }[] = [
-  { id: "square", label: "Tour 1 — Carré Magique" },
-  { id: "gilbreath", label: "Tour 2 — Gilbreath" },
+  { id: "gilbreath", label: "Tour 1 — Gilbreath" },
+  { id: "square", label: "Tour 2 — Carré Magique" },
 ];
 
 function App() {
