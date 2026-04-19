@@ -44,7 +44,7 @@ function App() {
                   : "rgba(255,255,255,0.05)",
               border: "none",
               borderRadius: "20px",
-              color: tour === id ? "#fff" : "#666",
+              color: "#fff",
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}

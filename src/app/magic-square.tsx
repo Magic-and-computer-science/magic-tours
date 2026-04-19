@@ -57,6 +57,7 @@ const analyzeSquare = (square: number[][], targetSum: number) => {
 export default function CarreMagique() {
   const [targetSum, setTargetSum] = useState(57);
   const [showSecret, setShowSecret] = useState(false);
+  const [showLatinSquare, setShowLatinSquare] = useState(true);
   const [highlightMode, setHighlightMode] = useState<
     "modified" | "row" | "col" | "diag" | null
   >("modified");
@@ -87,7 +88,8 @@ export default function CarreMagique() {
 
   // Détermine si une cellule doit être mise en évidence
   const shouldHighlight = (row: number, col: number): boolean => {
-    if (highlightMode === "modified") return isModified(row, col);
+    if (highlightMode === "modified")
+      return showLatinSquare && isModified(row, col);
     if (highlightMode === "row") return row === highlightIndex;
     if (highlightMode === "col") return col === highlightIndex;
     if (highlightMode === "diag") {
@@ -204,7 +206,7 @@ export default function CarreMagique() {
       >
         {square.flatMap((row, rowIndex) => [
           ...row.map((value, colIndex) => {
-            const modified = isModified(rowIndex, colIndex);
+            const modified = isModified(rowIndex, colIndex) && showLatinSquare;
             const highlighted = shouldHighlight(rowIndex, colIndex);
 
             return (
@@ -320,6 +322,43 @@ export default function CarreMagique() {
             {label}
           </button>
         ))}
+      </div>
+
+      {/* Toggle carré latin */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <button
+          onClick={() => {
+            const next = !showLatinSquare;
+            setShowLatinSquare(next);
+            if (!next && highlightMode === "modified") setHighlightMode(null);
+          }}
+          style={{
+            padding: "0.5rem 1.2rem",
+            fontSize: "0.75rem",
+            fontFamily: "inherit",
+            letterSpacing: "0.05em",
+            background: showLatinSquare
+              ? "linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)"
+              : "rgba(255,255,255,0.05)",
+            border: "none",
+            borderRadius: "20px",
+            color: showLatinSquare ? "#fff" : "#555",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span>{showLatinSquare ? "◉" : "○"}</span>
+          Carré latin
+        </button>
       </div>
 
       {/* Navigation pour lignes/colonnes/diagonales */}
@@ -625,7 +664,7 @@ export default function CarreMagique() {
           textAlign: "center",
           marginTop: "3rem",
           fontSize: "0.7rem",
-          color: "#555",
+          color: "#fff",
           letterSpacing: "0.1em",
         }}
       >

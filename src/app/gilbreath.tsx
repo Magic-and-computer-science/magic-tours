@@ -551,7 +551,7 @@ export default function Gilbreath() {
           textAlign: "center",
           marginTop: "3rem",
           fontSize: "0.7rem",
-          color: "#555",
+          color: "#fff",
           letterSpacing: "0.1em",
         }}
       >
