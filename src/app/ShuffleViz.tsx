@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { type Card } from "../gilbreath-principle.js";
 import { CardChip } from "./CardShip.js";
+import { RiffleIllustration } from "./RiffleIllustration.js";
 
 const srOnly: CSSProperties = {
   position: "absolute",
@@ -99,12 +100,14 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
           color: "#666",
           letterSpacing: "0.15em",
           textTransform: "uppercase",
-          marginBottom: "1.5rem",
+          marginBottom: "0.5rem",
           textAlign: "center",
         }}
       >
         Déroulement du riffle shuffle — intercalement carte par carte
       </div>
+
+      <RiffleIllustration />
 
       {/* Deck 1 */}
       <div
