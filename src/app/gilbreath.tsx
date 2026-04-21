@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   createInitialDecks,
   riffleShuffle,
@@ -6,57 +6,8 @@ import {
   type Card,
   type ShuffleResult,
 } from "../gilbreath-principle.js";
-
-function CardChip({ card, size = "md" }: { card: Card; size?: "sm" | "md" }) {
-  const isRed = card.color === "red";
-  const w = size === "sm" ? "40px" : "50px";
-  const h = size === "sm" ? "54px" : "68px";
-  const fSuit = size === "sm" ? "1rem" : "1.25rem";
-  const fLabel = size === "sm" ? "0.58rem" : "0.68rem";
-
-  return (
-    <div
-      style={{
-        width: w,
-        height: h,
-        borderRadius: "8px",
-        background: isRed
-          ? "linear-gradient(160deg, #7f1d1d 0%, #3b0808 100%)"
-          : "linear-gradient(160deg, #1e293b 0%, #0c1627 100%)",
-        border: `2px solid ${isRed ? "rgba(239,68,68,0.65)" : "rgba(71,85,105,0.65)"}`,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "1px",
-        boxShadow: isRed
-          ? "0 0 10px rgba(239,68,68,0.22), inset 0 1px 0 rgba(255,255,255,0.07)"
-          : "0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
-        flexShrink: 0,
-      }}
-    >
-      <span
-        style={{
-          fontSize: fSuit,
-          color: isRed ? "#f87171" : "#64748b",
-          lineHeight: 1,
-        }}
-      >
-        {card.suit}
-      </span>
-      <span
-        style={{
-          fontSize: fLabel,
-          fontWeight: 700,
-          letterSpacing: "0.05em",
-          color: isRed ? "#fca5a5" : "#94a3b8",
-        }}
-      >
-        {isRed ? "R" : "N"}
-      </span>
-    </div>
-  );
-}
+import { CardChip } from "./CardShip.js";
+import { ShuffleViz } from "./ShuffleViz.js";
 
 function PairBox({
   result,
@@ -112,6 +63,7 @@ export default function Gilbreath() {
   const { deck1, deck2 } = useMemo(() => createInitialDecks(), []);
   const [history, setHistory] = useState<ShuffleResult[]>([]);
   const [showSecret, setShowSecret] = useState(false);
+  const [showShuffle, setShowShuffle] = useState(true);
   const [animating, setAnimating] = useState(false);
 
   const latest = history[history.length - 1] ?? null;
@@ -229,6 +181,46 @@ export default function Gilbreath() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Shuffle visualization */}
+      <div style={{ maxWidth: "780px", margin: "0 auto 2rem" }}>
+        <button
+          onClick={() => setShowShuffle((v) => !v)}
+          style={{
+            width: "100%",
+            padding: "0.75rem 1.25rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "rgba(0,0,0,0.2)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: showShuffle ? "16px 16px 0 0" : "16px",
+            color: "#666",
+            fontSize: "0.68rem",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            fontFamily: "inherit",
+            cursor: "pointer",
+            transition: "border-radius 0.2s",
+          }}
+        >
+          <span>Visualisation du mélange</span>
+          <span style={{ fontSize: "0.8rem", transition: "transform 0.2s", display: "inline-block", transform: showShuffle ? "rotate(0deg)" : "rotate(-90deg)" }}>▾</span>
+        </button>
+        {showShuffle && (
+          <div
+            style={{
+              background: "rgba(0,0,0,0.2)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderTop: "none",
+              borderRadius: "0 0 16px 16px",
+              overflow: "hidden",
+            }}
+          >
+            <ShuffleViz deck1={deck1} deck2={deck2} />
+          </div>
+        )}
       </div>
 
       {/* Shuffle button */}
