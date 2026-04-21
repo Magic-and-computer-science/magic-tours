@@ -1,6 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { type Card } from "../gilbreath-principle.js";
 import { CardChip } from "./CardShip.js";
+
+const srOnly: CSSProperties = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: 0,
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0,0,0,0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
 
 export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
   const [step, setStep] = useState(0);
@@ -17,15 +29,28 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
     return seq;
   }, [deck1, deck2, n]);
 
+  const prefersReducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
+  const cardTransition = prefersReducedMotion
+    ? "none"
+    : "opacity 0.3s, transform 0.3s, filter 0.3s";
+  const resultTransition = prefersReducedMotion ? "none" : "transform 0.25s";
+
   useEffect(() => {
     if (!playing) return;
     if (step >= total) {
       setPlaying(false);
       return;
     }
-    const timer = setTimeout(() => setStep((s) => s + 1), 650);
+    const delay = prefersReducedMotion ? 0 : 650;
+    const timer = setTimeout(() => setStep((s) => s + 1), delay);
     return () => clearTimeout(timer);
-  }, [playing, step, total]);
+  }, [playing, step, total, prefersReducedMotion]);
 
   const handlePlayPause = () => {
     if (step >= total) {
@@ -48,11 +73,25 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
 
   const nextItem = step < total ? sequence[step] : null;
 
+  const playLabel = playing
+    ? "Mettre en pause"
+    : step >= total
+      ? "Rejouer depuis le début"
+      : "Animer le mélange";
+
+  const onBtnFocus = (e: { currentTarget: { style: CSSStyleDeclaration } }) => {
+    e.currentTarget.style.outline = "2px solid #4ecdc4";
+    e.currentTarget.style.outlineOffset = "2px";
+  };
+  const onBtnBlur = (e: { currentTarget: { style: CSSStyleDeclaration } }) => {
+    e.currentTarget.style.outline = "";
+    e.currentTarget.style.outlineOffset = "";
+  };
+
   return (
-    <div
-      style={{
-        padding: "1.5rem 1.5rem 1.25rem",
-      }}
+    <section
+      aria-label="Visualisation du riffle shuffle"
+      style={{ padding: "1.5rem 1.5rem 1.25rem" }}
     >
       <div
         style={{
@@ -106,8 +145,11 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
                 <div
                   style={{
                     opacity: isPlaced ? 0.18 : 1,
-                    transform: isActive ? "translateY(-7px)" : "translateY(0)",
-                    transition: "opacity 0.3s, transform 0.3s, filter 0.3s",
+                    transform:
+                      isActive && !prefersReducedMotion
+                        ? "translateY(-7px)"
+                        : "translateY(0)",
+                    transition: cardTransition,
                     filter: isActive
                       ? "drop-shadow(0 0 10px rgba(78,205,196,0.9))"
                       : "none",
@@ -116,11 +158,12 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
                   <CardChip card={card} size="sm" />
                 </div>
                 <span
+                  aria-hidden="true"
                   style={{
                     fontSize: "0.58rem",
-                    color: isActive ? "#4ecdc4" : isPlaced ? "#2a2a3a" : "#444",
+                    color: isActive ? "#4ecdc4" : isPlaced ? "#555" : "#666",
                     fontWeight: isActive ? 700 : 400,
-                    transition: "color 0.3s",
+                    transition: cardTransition,
                   }}
                 >
                   {seqPos + 1}
@@ -170,8 +213,11 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
                 <div
                   style={{
                     opacity: isPlaced ? 0.18 : 1,
-                    transform: isActive ? "translateY(-7px)" : "translateY(0)",
-                    transition: "opacity 0.3s, transform 0.3s, filter 0.3s",
+                    transform:
+                      isActive && !prefersReducedMotion
+                        ? "translateY(-7px)"
+                        : "translateY(0)",
+                    transition: cardTransition,
                     filter: isActive
                       ? "drop-shadow(0 0 10px rgba(102,126,234,0.9))"
                       : "none",
@@ -180,11 +226,12 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
                   <CardChip card={card} size="sm" />
                 </div>
                 <span
+                  aria-hidden="true"
                   style={{
                     fontSize: "0.58rem",
-                    color: isActive ? "#667eea" : isPlaced ? "#2a2a3a" : "#444",
+                    color: isActive ? "#667eea" : isPlaced ? "#555" : "#666",
                     fontWeight: isActive ? 700 : 400,
-                    transition: "color 0.3s",
+                    transition: cardTransition,
                   }}
                 >
                   {seqPos + 1}
@@ -228,8 +275,11 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
             <div
               key={i}
               style={{
-                transform: i === step - 1 ? "scale(1.12)" : "scale(1)",
-                transition: "transform 0.25s",
+                transform:
+                  i === step - 1 && !prefersReducedMotion
+                    ? "scale(1.12)"
+                    : "scale(1)",
+                transition: resultTransition,
                 filter:
                   i === step - 1
                     ? item.fromDeck === 1
@@ -243,6 +293,7 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
           ))}
           {step < total && (
             <div
+              aria-hidden="true"
               style={{
                 width: "40px",
                 height: "54px",
@@ -262,6 +313,9 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
 
       {/* Status */}
       <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
         style={{
           minHeight: "30px",
           marginBottom: "1rem",
@@ -278,7 +332,8 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
       >
         {step === total ? (
           <span style={{ color: "#4ecdc4" }}>
-            ✓ Chaque paire consécutive contient une carte de chaque paquet
+            Mélange terminé — chaque paire consécutive contient une carte de
+            chaque paquet
           </span>
         ) : nextItem ? (
           <span>
@@ -294,8 +349,8 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
             → position {step + 1}
           </span>
         ) : (
-          <span style={{ color: "#444" }}>
-            Appuie sur ▶ pour voir le mélange s'animer
+          <span style={{ color: "#666" }}>
+            Utilise les boutons ci-dessous pour voir le mélange s'animer
           </span>
         )}
       </div>
@@ -312,6 +367,9 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
         <button
           onClick={handlePrev}
           disabled={step === 0}
+          aria-label="Étape précédente"
+          onFocus={onBtnFocus}
+          onBlur={onBtnBlur}
           style={{
             padding: "0.45rem 1rem",
             fontSize: "0.85rem",
@@ -319,14 +377,17 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
             background: "rgba(255,255,255,0.05)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "20px",
-            color: step === 0 ? "#2a2a3a" : "#777",
+            color: step === 0 ? "#2a2a3a" : "#999",
             cursor: step === 0 ? "default" : "pointer",
           }}
         >
-          ‹
+          <span aria-hidden="true">‹</span>
         </button>
         <button
           onClick={handlePlayPause}
+          aria-label={playLabel}
+          onFocus={onBtnFocus}
+          onBlur={onBtnBlur}
           style={{
             padding: "0.45rem 1.5rem",
             fontSize: "0.8rem",
@@ -340,14 +401,20 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
             color: "#fff",
             cursor: "pointer",
             minWidth: "110px",
-            transition: "background 0.3s",
+            transition: prefersReducedMotion ? "none" : "background 0.3s",
           }}
         >
-          {playing ? "⏸ Pause" : step >= total ? "↺ Rejouer" : "▶ Animer"}
+          <span aria-hidden="true">
+            {playing ? "⏸ Pause" : step >= total ? "↺ Rejouer" : "▶ Animer"}
+          </span>
+          <span style={srOnly}>{playLabel}</span>
         </button>
         <button
           onClick={handleNext}
           disabled={step >= total}
+          aria-label="Étape suivante"
+          onFocus={onBtnFocus}
+          onBlur={onBtnBlur}
           style={{
             padding: "0.45rem 1rem",
             fontSize: "0.85rem",
@@ -355,16 +422,20 @@ export function ShuffleViz({ deck1, deck2 }: { deck1: Card[]; deck2: Card[] }) {
             background: "rgba(255,255,255,0.05)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "20px",
-            color: step >= total ? "#2a2a3a" : "#777",
+            color: step >= total ? "#2a2a3a" : "#999",
             cursor: step >= total ? "default" : "pointer",
           }}
         >
-          ›
+          <span aria-hidden="true">›</span>
         </button>
-        <span style={{ fontSize: "0.62rem", color: "#333", minWidth: "32px" }}>
+        <span
+          aria-live="polite"
+          aria-atomic="true"
+          style={{ fontSize: "0.62rem", color: "#777", minWidth: "32px" }}
+        >
           {step}/{total}
         </span>
       </div>
-    </div>
+    </section>
   );
 }

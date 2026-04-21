@@ -1,5 +1,12 @@
 import type { Card } from "../gilbreath-principle";
 
+const SUIT_NAMES: Record<string, string> = {
+  "♥": "cœur",
+  "♠": "pique",
+  "♦": "carreau",
+  "♣": "trèfle",
+};
+
 export function CardChip({
   card,
   size = "md",
@@ -12,9 +19,13 @@ export function CardChip({
   const h = size === "sm" ? "54px" : "68px";
   const fSuit = size === "sm" ? "1rem" : "1.25rem";
   const fLabel = size === "sm" ? "0.58rem" : "0.68rem";
+  const colorLabel = isRed ? "Rouge" : "Noir";
+  const suitLabel = SUIT_NAMES[card.suit] ?? card.suit;
 
   return (
     <div
+      role="img"
+      aria-label={`Carte ${colorLabel}, ${suitLabel}`}
       style={{
         width: w,
         height: h,
@@ -35,6 +46,7 @@ export function CardChip({
       }}
     >
       <span
+        aria-hidden="true"
         style={{
           fontSize: fSuit,
           color: isRed ? "#f87171" : "#64748b",
@@ -44,6 +56,7 @@ export function CardChip({
         {card.suit}
       </span>
       <span
+        aria-hidden="true"
         style={{
           fontSize: fLabel,
           fontWeight: 700,

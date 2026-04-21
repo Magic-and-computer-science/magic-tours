@@ -1,13 +1,24 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, type CSSProperties } from "react";
 import {
   createInitialDecks,
   riffleShuffle,
   analyzeGilbreath,
-  type Card,
   type ShuffleResult,
 } from "../gilbreath-principle.js";
 import { CardChip } from "./CardShip.js";
 import { ShuffleViz } from "./ShuffleViz.js";
+
+const srOnly: CSSProperties = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: 0,
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0,0,0,0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
 
 function PairBox({
   result,
@@ -34,8 +45,8 @@ function PairBox({
     >
       <span
         style={{
-          fontSize: "0.55rem",
-          color: "#555",
+          fontSize: "0.7rem",
+          color: "#aaa",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}
@@ -53,7 +64,8 @@ function PairBox({
           color: result.valid ? "#4ecdc4" : "#ef4444",
         }}
       >
-        {result.valid ? "✓" : "✗"}
+        <span aria-hidden="true">{result.valid ? "✓" : "✗"}</span>
+        <span style={srOnly}>{result.valid ? "Valide" : "Invalide"}</span>
       </span>
     </div>
   );
@@ -70,18 +82,35 @@ export default function Gilbreath() {
   const shuffleCount = history.length;
   const validCount = history.filter((r) => r.invariantHolds).length;
 
+  const prefersReducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
   const handleShuffle = useCallback(() => {
     if (animating) return;
     setAnimating(true);
+    const delay = prefersReducedMotion ? 0 : 280;
     setTimeout(() => {
       const deck = riffleShuffle(deck1, deck2);
       setHistory((prev) => [...prev, analyzeGilbreath(deck)]);
       setAnimating(false);
-    }, 280);
-  }, [deck1, deck2, animating]);
+    }, delay);
+  }, [deck1, deck2, animating, prefersReducedMotion]);
+
+  const onBtnFocus = (e: { currentTarget: { style: CSSStyleDeclaration } }) => {
+    e.currentTarget.style.outline = "2px solid #4ecdc4";
+    e.currentTarget.style.outlineOffset = "2px";
+  };
+  const onBtnBlur = (e: { currentTarget: { style: CSSStyleDeclaration } }) => {
+    e.currentTarget.style.outline = "";
+    e.currentTarget.style.outlineOffset = "";
+  };
 
   return (
-    <div
+    <main
       style={{
         fontFamily: '"JetBrains Mono", "Fira Code", monospace',
         padding: "2rem",
@@ -107,7 +136,7 @@ export default function Gilbreath() {
           Principe de Gilbreath
         </h1>
         <p
-          style={{ fontSize: "0.85rem", color: "#888", letterSpacing: "0.1em" }}
+          style={{ fontSize: "0.85rem", color: "#aaa", letterSpacing: "0.1em" }}
         >
           Invariant de structure — préservé par tout riffle shuffle
         </p>
@@ -151,7 +180,10 @@ export default function Gilbreath() {
           </div>
         </div>
 
-        <div style={{ fontSize: "1.4rem", color: "#334", userSelect: "none" }}>
+        <div
+          aria-hidden="true"
+          style={{ fontSize: "1.4rem", color: "#334", userSelect: "none" }}
+        >
           ⇄
         </div>
 
@@ -187,6 +219,10 @@ export default function Gilbreath() {
       <div style={{ maxWidth: "780px", margin: "0 auto 2rem" }}>
         <button
           onClick={() => setShowShuffle((v) => !v)}
+          aria-expanded={showShuffle}
+          aria-controls="shuffle-viz-panel"
+          onFocus={onBtnFocus}
+          onBlur={onBtnBlur}
           style={{
             width: "100%",
             padding: "0.75rem 1.25rem",
@@ -196,20 +232,31 @@ export default function Gilbreath() {
             background: "rgba(0,0,0,0.2)",
             border: "1px solid rgba(255,255,255,0.06)",
             borderRadius: showShuffle ? "16px 16px 0 0" : "16px",
-            color: "#666",
+            color: "#aaa",
             fontSize: "0.68rem",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
             fontFamily: "inherit",
             cursor: "pointer",
-            transition: "border-radius 0.2s",
+            transition: prefersReducedMotion ? "none" : "border-radius 0.2s",
           }}
         >
           <span>Visualisation du mélange</span>
-          <span style={{ fontSize: "0.8rem", transition: "transform 0.2s", display: "inline-block", transform: showShuffle ? "rotate(0deg)" : "rotate(-90deg)" }}>▾</span>
+          <span
+            aria-hidden="true"
+            style={{
+              fontSize: "0.8rem",
+              transition: prefersReducedMotion ? "none" : "transform 0.2s",
+              display: "inline-block",
+              transform: showShuffle ? "rotate(0deg)" : "rotate(-90deg)",
+            }}
+          >
+            ▾
+          </span>
         </button>
         {showShuffle && (
           <div
+            id="shuffle-viz-panel"
             style={{
               background: "rgba(0,0,0,0.2)",
               border: "1px solid rgba(255,255,255,0.06)",
@@ -228,6 +275,9 @@ export default function Gilbreath() {
         <button
           onClick={handleShuffle}
           disabled={animating}
+          aria-busy={animating}
+          onFocus={onBtnFocus}
+          onBlur={onBtnBlur}
           style={{
             padding: "1rem 2.8rem",
             fontSize: "0.95rem",
@@ -239,9 +289,9 @@ export default function Gilbreath() {
               : "linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)",
             border: "none",
             borderRadius: "30px",
-            color: animating ? "#555" : "#fff",
+            color: animating ? "#888" : "#fff",
             cursor: animating ? "wait" : "pointer",
-            transition: "all 0.3s ease",
+            transition: prefersReducedMotion ? "none" : "all 0.3s ease",
             boxShadow: animating ? "none" : "0 4px 20px rgba(78,205,196,0.4)",
           }}
         >
@@ -254,89 +304,95 @@ export default function Gilbreath() {
       </div>
 
       {/* Result */}
-      {latest && (
-        <div
-          style={{
-            maxWidth: "780px",
-            margin: "0 auto 2rem",
-            padding: "1.5rem",
-            background: "rgba(0,0,0,0.2)",
-            borderRadius: "16px",
-            border: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
+      <div aria-live="polite" aria-atomic="false">
+        {latest && (
           <div
             style={{
-              fontSize: "0.68rem",
-              color: "#666",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              marginBottom: "1.25rem",
-              textAlign: "center",
+              maxWidth: "780px",
+              margin: "0 auto 2rem",
+              padding: "1.5rem",
+              background: "rgba(0,0,0,0.2)",
+              borderRadius: "16px",
+              border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            Résultat — paires après mélange #{shuffleCount}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            {latest.pairs.map((pair, i) => (
-              <PairBox key={i} result={pair} index={i} />
-            ))}
-          </div>
-
-          {/* Invariant status */}
-          <div
-            style={{
-              marginTop: "1.25rem",
-              padding: "0.85rem 1.25rem",
-              background: latest.invariantHolds
-                ? "rgba(78,205,196,0.07)"
-                : "rgba(239,68,68,0.07)",
-              borderRadius: "10px",
-              border: `1px solid ${latest.invariantHolds ? "rgba(78,205,196,0.3)" : "rgba(239,68,68,0.3)"}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "1rem",
-              flexWrap: "wrap",
-            }}
-          >
-            <span
+            <div
               style={{
-                fontSize: "0.72rem",
-                color: "#666",
-                letterSpacing: "0.1em",
+                fontSize: "0.68rem",
+                color: "#999",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                marginBottom: "1.25rem",
+                textAlign: "center",
               }}
             >
-              INVARIANT GILBREATH
-            </span>
-            <span
+              Résultat — paires après mélange #{shuffleCount}
+            </div>
+
+            <div
               style={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                color: latest.invariantHolds ? "#4ecdc4" : "#ef4444",
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                justifyContent: "center",
               }}
             >
-              {latest.pairs.filter((p) => p.valid).length}/{latest.pairs.length}{" "}
-              paires valides
-              {"  "}
-              {latest.invariantHolds ? "✓" : "✗"}
-            </span>
-            {shuffleCount > 1 && (
-              <span style={{ fontSize: "0.72rem", color: "#555" }}>
-                {validCount}/{shuffleCount} mélanges vérifiés
+              {latest.pairs.map((pair, i) => (
+                <PairBox key={i} result={pair} index={i} />
+              ))}
+            </div>
+
+            {/* Invariant status */}
+            <div
+              style={{
+                marginTop: "1.25rem",
+                padding: "0.85rem 1.25rem",
+                background: latest.invariantHolds
+                  ? "rgba(78,205,196,0.07)"
+                  : "rgba(239,68,68,0.07)",
+                borderRadius: "10px",
+                border: `1px solid ${latest.invariantHolds ? "rgba(78,205,196,0.3)" : "rgba(239,68,68,0.3)"}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "1rem",
+                flexWrap: "wrap",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  color: "#999",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                INVARIANT GILBREATH
               </span>
-            )}
+              <span
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  color: latest.invariantHolds ? "#4ecdc4" : "#ef4444",
+                }}
+              >
+                {latest.pairs.filter((p) => p.valid).length}/
+                {latest.pairs.length} paires valides{"  "}
+                <span aria-hidden="true">
+                  {latest.invariantHolds ? "✓" : "✗"}
+                </span>
+                <span style={srOnly}>
+                  {latest.invariantHolds ? "vérifié" : "non vérifié"}
+                </span>
+              </span>
+              {shuffleCount > 1 && (
+                <span style={{ fontSize: "0.72rem", color: "#888" }}>
+                  {validCount}/{shuffleCount} mélanges vérifiés
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Shannon entropy panel */}
       <div
@@ -406,7 +462,7 @@ export default function Gilbreath() {
           style={{
             marginTop: "1rem",
             fontSize: "0.72rem",
-            color: "#556",
+            color: "#8898aa",
             textAlign: "center",
             lineHeight: 1.6,
           }}
@@ -420,6 +476,10 @@ export default function Gilbreath() {
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
         <button
           onClick={() => setShowSecret(!showSecret)}
+          aria-expanded={showSecret}
+          aria-controls="secret-panel"
+          onFocus={onBtnFocus}
+          onBlur={onBtnBlur}
           style={{
             padding: "0.8rem 2rem",
             fontSize: "0.8rem",
@@ -432,8 +492,10 @@ export default function Gilbreath() {
             borderRadius: "30px",
             color: "#fff",
             cursor: "pointer",
-            transition: "all 0.3s ease",
-            boxShadow: showSecret ? "none" : "0 4px 20px rgba(102,126,234,0.4)",
+            transition: prefersReducedMotion ? "none" : "all 0.3s ease",
+            boxShadow: showSecret
+              ? "none"
+              : "0 4px 20px rgba(102,126,234,0.4)",
           }}
         >
           {showSecret ? "Masquer le secret" : "Révéler le secret mathématique"}
@@ -443,6 +505,7 @@ export default function Gilbreath() {
       {/* Secret content */}
       {showSecret && (
         <div
+          id="secret-panel"
           style={{
             maxWidth: "620px",
             margin: "0 auto 2rem",
@@ -452,7 +515,7 @@ export default function Gilbreath() {
             border: "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          <h3
+          <h2
             style={{
               fontSize: "1rem",
               fontWeight: 500,
@@ -462,7 +525,7 @@ export default function Gilbreath() {
             }}
           >
             L'invariant de Gilbreath
-          </h3>
+          </h2>
 
           <div style={{ fontSize: "0.85rem", lineHeight: 1.85, color: "#bbb" }}>
             <p style={{ marginBottom: "1rem" }}>
@@ -550,6 +613,6 @@ export default function Gilbreath() {
         "Quand la Magie exécute du Code" — Devoxx 2026 - Marjorie Aubert et
         Nicolas Bétheuil
       </div>
-    </div>
+    </main>
   );
 }
