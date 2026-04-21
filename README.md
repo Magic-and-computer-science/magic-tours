@@ -26,6 +26,11 @@ La magie repose sur une **asymétrie d'information** : le spectateur perçoit du
 
 **Le principe :** L'invariant `couleur(deck1[i]) ≠ couleur(deck2[i])` est préservé par tout entrelacement des deux piles. L'entropie perçue est maximale ; l'entropie réelle est nulle.
 
+**Dans l'app :**
+- Illustration SVG du riffle shuffle en position bridge (deux éventails face à face, cartes entrelacées au centre)
+- Animation pas-à-pas de l'intercalement carte par carte, avec contrôles lecture / pause / étape
+- Accordéon pour afficher ou masquer la visualisation pendant la démo
+
 **Parallèle crypto :** Clé publique / clé privée — la structure sous-jacente est invisible sans le secret.
 
 ---
@@ -82,13 +87,16 @@ Les tests valident les invariants mathématiques, dont un stress test de 1 000 m
 
 ```
 src/
-├── gilbreath-principle.ts   # logique du principe de Gilbreath
-├── magical-square.ts        # algorithme du carré magique (Dürer)
+├── gilbreath-principle.ts      # logique du principe de Gilbreath
+├── magical-square.ts           # algorithme du carré magique (Dürer)
 ├── app/
-│   ├── gilbreath.tsx        # composant interactif — cartes
-│   └── magic-square.tsx     # composant interactif — carré
-├── main.tsx                 # navigation entre les deux tours
-└── index.test.ts            # tests des invariants
+│   ├── gilbreath.tsx           # composant interactif — cartes
+│   ├── ShuffleViz.tsx          # animation pas-à-pas du riffle shuffle
+│   ├── RiffleIllustration.tsx  # illustration SVG des deux éventails
+│   ├── CardShip.tsx            # chip visuel d'une carte (couleur + enseigne)
+│   └── magic-square.tsx        # composant interactif — carré
+├── main.tsx                    # navigation entre les deux tours
+└── index.test.ts               # tests des invariants
 ```
 
 ---
