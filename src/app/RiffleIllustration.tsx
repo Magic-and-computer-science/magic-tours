@@ -101,7 +101,7 @@ export function RiffleIllustration() {
     <svg
       role="img"
       aria-label="Illustration d'un riffle shuffle : deux demi-paquets de cartes en éventail s'intercalent au centre pour former le paquet mélangé"
-      viewBox="0 0 560 215"
+      viewBox="0 0 560 170"
       xmlns="http://www.w3.org/2000/svg"
       style={{
         width: "100%",
@@ -135,14 +135,14 @@ export function RiffleIllustration() {
       </text>
 
       {/* ── Left fan — back cards first so front renders on top ── */}
-      <g transform="translate(155, 190)">
+      <g transform="translate(155, 155)">
         {LEFT_FAN.map((c, i) => (
           <Card key={i} c={c} />
         ))}
       </g>
 
       {/* ── Right fan ── */}
-      <g transform="translate(405, 190)">
+      <g transform="translate(405, 155)">
         {RIGHT_FAN.map((c, i) => (
           <Card key={i} c={c} />
         ))}
@@ -152,7 +152,7 @@ export function RiffleIllustration() {
       {CENTER_CARDS.map(({ cx, isLeft }, i) => (
         <g
           key={i}
-          transform={`translate(${cx}, 190) rotate(${isLeft ? 32 : -32})`}
+          transform={`translate(${cx}, 155) rotate(${isLeft ? 32 : -32})`}
         >
           <rect
             x={-W / 2}
