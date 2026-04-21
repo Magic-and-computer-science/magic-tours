@@ -13,9 +13,9 @@ type FanCard = {
 
 const LEFT_FAN: FanCard[] = [
   { angle: -32, fill: "#100808", stroke: "rgba(239,68,68,0.12)" },
-  { angle: -16, fill: "#2d1010", stroke: "rgba(239,68,68,0.32)" },
+  { angle: -16, fill: "#0f1525", stroke: "rgba(71,85,105,0.32)" },
   { angle: 0, fill: "#521515", stroke: "rgba(239,68,68,0.58)" },
-  { angle: 16, fill: "#6a1a1a", stroke: "rgba(239,68,68,0.78)" },
+  { angle: 16, fill: "#1a2538", stroke: "rgba(71,85,105,0.78)" },
   {
     angle: 32,
     fill: "#7f1d1d",
@@ -29,9 +29,9 @@ const LEFT_FAN: FanCard[] = [
 
 const RIGHT_FAN: FanCard[] = [
   { angle: 32, fill: "#060810", stroke: "rgba(71,85,105,0.12)" },
-  { angle: 16, fill: "#0f1525", stroke: "rgba(71,85,105,0.32)" },
+  { angle: 16, fill: "#2d1010", stroke: "rgba(239,68,68,0.32)" },
   { angle: 0, fill: "#162035", stroke: "rgba(71,85,105,0.58)" },
-  { angle: -16, fill: "#1a2538", stroke: "rgba(71,85,105,0.78)" },
+  { angle: -16, fill: "#6a1a1a", stroke: "rgba(239,68,68,0.78)" },
   {
     angle: -32,
     fill: "#1e293b",
